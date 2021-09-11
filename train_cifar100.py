@@ -4,8 +4,6 @@ from sklearn.model_selection import train_test_split
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.callbacks import ModelCheckpoint, ReduceLROnPlateau
 from model import VisionTransformer
-import numpy as np
-
 from data_augmentations import random_hue_saturation, random_brightness_contrast, flip_horizontal, flip_vertical, random_zoom_crop
 
 AUTOTUNE = tf.data.experimental.AUTOTUNE
