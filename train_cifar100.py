@@ -13,7 +13,9 @@ os.environ["DML_VISIBLE_DEVICES"] = "1"
 
 if __name__ == "__main__":
     
+    #You can uncomment the below line to view DirectML Device Placement logs for the model's operators
     #tf.debugging.set_log_device_placement(True) 
+    
     tf.disable_v2_behavior()
     tf.enable_eager_execution() 
 
@@ -28,7 +30,7 @@ if __name__ == "__main__":
     LEARNING_RATE= 0.001 
     BATCH_SIZE= 128
     EPOCHS= 100
-    PATIENCE= 10
+    PATIENCE= 10 #Patience controls the number of epochs with no increase in validation accuracy the Learning Rate Scheduler will wait before reducing Learning Rate
 
     (X_train, y_train) , (X_test, y_test) = tf.keras.datasets.cifar100.load_data()
     X_train, X_validate, y_train, y_validate = train_test_split(X_train, y_train, test_size=0.15, shuffle=True)

@@ -4,16 +4,18 @@ from sklearn.model_selection import train_test_split
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.callbacks import ModelCheckpoint, ReduceLROnPlateau
 from model import VisionTransformer
-from data_augmentations import random_hue_saturation, random_brightness_contrast, flip_horizontal, rotate_20, rotate_30, flip_vertical, random_zoom_crop, grayscale, random_jpeg_noise
+from data_augmentations import random_hue_saturation, random_brightness_contrast, flip_horizontal, flip_vertical, random_zoom_crop
 
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 
-#Run on GPU0
-os.environ["DML_VISIBLE_DEVICES"] = "1"
+#Run on GPU 1
+#os.environ["DML_VISIBLE_DEVICES"] = "1"
 
 if __name__ == "__main__":
     
+    #You can uncomment the below line to view DirectML Device Placement logs for the model's operators
     #tf.debugging.set_log_device_placement(True) 
+    
     tf.disable_v2_behavior()
     tf.enable_eager_execution() 
 
@@ -28,7 +30,7 @@ if __name__ == "__main__":
     LEARNING_RATE= 0.001 
     BATCH_SIZE= 128
     EPOCHS= 100
-    PATIENCE= 10
+    PATIENCE= 10 #Patience controls the number of epochs with no increase in validation accuracy the Learning Rate Scheduler will wait before reducing Learning Rate
 
     (X_train, y_train) , (X_test, y_test) = tf.keras.datasets.cifar10.load_data()
     X_train, X_validate, y_train, y_validate = train_test_split(X_train, y_train, test_size=0.15, shuffle=True)
@@ -44,11 +46,10 @@ if __name__ == "__main__":
     validation_dataset = validation_dataset.map(cast_to_float)
 
 
-
     def get_train_dataset(train_dataset):
 
         train_dataset= train_dataset.shuffle(10000, reshuffle_each_iteration= True)
-        augmentations = [random_hue_saturation, random_brightness_contrast, flip_horizontal,flip_horizontal, flip_vertical]
+        augmentations = [random_hue_saturation, random_zoom_crop, random_brightness_contrast, flip_horizontal,flip_horizontal, flip_vertical]
         for aug in augmentations:
             train_dataset = train_dataset.map(lambda x, y: (tf.cond(tf.random_uniform([], 0, 1) > 0.86, lambda: aug(x), lambda: x), y), num_parallel_calls=AUTOTUNE)
            
@@ -84,7 +85,7 @@ if __name__ == "__main__":
         ],
     )
     
-file_path= './saved_models/Model_Cifar10'
+file_path= './saved_models/Model_Cifar100'
 checkpoint = ModelCheckpoint(file_path, monitor='val_Top-1-accuracy', verbose=1, save_best_only=True, mode='max')
 reduce_on_plateau = ReduceLROnPlateau(monitor="val_Top-1-accuracy", mode="max", factor=0.5, patience=PATIENCE, verbose=1,min_lr=0.00002)
 callbacks_list = [checkpoint, reduce_on_plateau]
